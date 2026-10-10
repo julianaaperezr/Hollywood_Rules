@@ -70,3 +70,39 @@ prueba_ROI <- t.test(
 )
 
 prueba_ROI
+
+
+# PUNTO 3 - Comedias v.s otros generos 
+# A. 
+# Comparación del Total U.S. Gross
+comedias <- Hollywood %>%
+  filter(Genre == "Comedy")
+
+no_comedias <- Hollywood %>%
+  filter(Genre != "Comedy")
+
+# Promedio del Total U.S. Gross por grupo
+mean(comedias$`Total U.S. Gross`)
+mean(no_comedias$`Total U.S. Gross`)
+
+# Prueba de diferencia de medias del Total U.S. Gross
+prueba_gross_comedia <- t.test(
+  comedias$`Total U.S. Gross`,
+  no_comedias$`Total U.S. Gross`
+)
+
+prueba_gross_comedia
+
+# B. 
+# Comparacion del ROI
+# ROI promedio por grupo
+mean(comedias$ROI_US)
+mean(no_comedias$ROI_US)
+
+# Prueba de diferencia de medias del ROI
+prueba_ROI_comedia <- t.test(
+  comedias$ROI_US,
+  no_comedias$ROI_US
+)
+
+prueba_ROI_comedia
