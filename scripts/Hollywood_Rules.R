@@ -11,8 +11,17 @@ Hollywood <- read_excel(
   sheet = "Exhibit 1"
 )
 
-# Para ver los nombres de las columnas
+
+# Validacion inicial de la base de datos 
+# Numero de observaciones
+nrow(Hollywood)
+
+# Nombres de las variables
 colnames(Hollywood)
+
+# Resumen de las variables
+summary(Hollywood)
+
 
 # PUNTO 1 - Descripcion inicial de los datos
 # Opening Gross
