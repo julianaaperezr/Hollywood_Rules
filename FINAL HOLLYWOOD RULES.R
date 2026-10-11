@@ -349,3 +349,157 @@ tabla_punto4_gt
 
 # Comprobar si existe una diferencia significativa al 5%
 prueba_R$p.value < 0.05
+
+
+# PUNTO 5  
+# A
+# Revisar los nombres de las variables
+colnames(Hollywood)
+
+# Crear una variable para identificar las comedias
+Hollywood <- Hollywood %>%
+  mutate(
+    Comedia = ifelse(Genre == "Comedy", 1, 0)
+  )
+
+# Verificar la cantidad de peliculas de cada grupo
+Hollywood %>%
+  count(Comedia)
+
+# Crear una regresion con los factores antes de producir
+modelo5 <- lm(
+  `Total U.S. Gross` ~ Budget + Comedia + MPAA_D +
+    Sequel + `Known Story`,
+  data = Hollywood
+)
+
+# Mostrar los resultados de la regresion
+summary(modelo5)
+
+# Crear una tabla con los resultados del modelo
+tabla_punto5a <- as.data.frame(
+  summary(modelo5)$coefficients
+)
+
+# Agregar los nombres de las variables
+tabla_punto5a$Variable <- rownames(tabla_punto5a)
+
+# Organizar las columnas de la tabla
+tabla_punto5a <- tabla_punto5a %>%
+  select(Variable, everything())
+
+# Mostrar la tabla de resultados
+tabla_punto5a
+
+# Dar formato a la tabla para el informe
+tabla_punto5a_gt <- tabla_punto5a %>%
+  gt() %>%
+  tab_header(
+    title = "Punto 5 - Regresion inicial"
+  ) %>%
+  fmt_number(
+    columns = where(is.numeric),
+    decimals = 4
+  ) %>%
+  tab_source_note(
+    source_note = "Fuente: elaboracion propia con base en Hollywood Rules."
+  )
+
+# Mostrar la tabla final
+tabla_punto5a_gt
+
+
+# PUNTO 5.B
+
+# Crear una copia del modelo inicial
+modelo5_final <- modelo5
+
+# Repetir el proceso para eliminar variables no significativas
+repeat {
+  
+  # Obtener los valores p sin incluir el intercepto
+  valores_p <- summary(modelo5_final)$coefficients[-1, 4]
+  
+  # Detener si no quedan variables explicativas
+  if (length(valores_p) == 0) break
+  
+  # Identificar el valor p mas alto
+  mayor_p <- max(valores_p)
+  
+  # Detener cuando todas las variables sean significativas al 10%
+  if (mayor_p <= 0.10) break
+  
+  # Identificar la variable con mayor valor p
+  variable_eliminar <- names(which.max(valores_p))
+  
+  # Eliminar la variable del modelo
+  modelo5_final <- update(
+    modelo5_final,
+    paste(". ~ . -", variable_eliminar)
+  )
+  
+}
+
+# Mostrar los resultados del modelo final
+summary(modelo5_final)
+
+# Crear una tabla con los resultados finales
+tabla_punto5b <- as.data.frame(
+  summary(modelo5_final)$coefficients
+)
+
+# Agregar los nombres de las variables
+tabla_punto5b$Variable <- rownames(tabla_punto5b)
+
+# Organizar las columnas
+tabla_punto5b <- tabla_punto5b %>%
+  select(Variable, everything())
+
+# Dar formato a la tabla para el informe
+tabla_punto5b_gt <- tabla_punto5b %>%
+  gt() %>%
+  tab_header(
+    title = "Punto 5 - Regresion final"
+  ) %>%
+  fmt_number(
+    columns = where(is.numeric),
+    decimals = 4
+  ) %>%
+  tab_source_note(
+    source_note = "Fuente: elaboracion propia con base en Hollywood Rules."
+  )
+
+# Mostrar la tabla final
+tabla_punto5b_gt
+
+# Mostrar el R cuadrado del modelo final
+summary(modelo5_final)$r.squared
+
+#punto 5c
+
+# Calcular el ingreso promedio de las secuelas
+mean(Hollywood$`Total U.S. Gross`[Hollywood$Sequel == 1])
+
+# Calcular el ingreso promedio de las peliculas que no son secuelas
+mean(Hollywood$`Total U.S. Gross`[Hollywood$Sequel == 0])
+
+# Mostrar los coeficientes del modelo final
+coef(modelo5_final)
+
+# Verificar si la variable Sequel permanece en el modelo
+"Sequel" %in% names(coef(modelo5_final))
+
+# Mostrar el efecto de las secuelas si permanece en el modelo
+if ("Sequel" %in% names(coef(modelo5_final))) {
+  
+  # Mostrar el coeficiente de Sequel
+  coef(modelo5_final)["Sequel"]
+  
+  # Mostrar su valor p
+  summary(modelo5_final)$coefficients[
+    "Sequel", "Pr(>|t|)"
+  ]
+  
+}
+
+
